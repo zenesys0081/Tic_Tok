@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'center',
     marginHorizontal: height * 0.02,
-    tintColor: '#000',
+    color: '#000',
     width: 32,
     height: 32,
   },

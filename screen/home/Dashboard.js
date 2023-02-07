@@ -117,172 +117,169 @@ export default function Dashboard({navigation}) {
   const renderItem = ({index, item}) => {
     return (
       <>
-        <SafeAreaView>
-          <View style={{flex: 1}}>
-            <Video
-              source={{
-                uri: item.url,
-              }}
-              ref={videoRef}
-              onBuffer={onBuffer}
-              onError={videoError}
-              repeat={true}
-              paused={currentIndex !== index}
-              resizeMode="cover"
-              style={styles.backgroundVideo}
-            />
-            {/* upper right container */}
-            <View style={styles.uiContainer}>
-              <View style={styles.rightContainer}>
+        <View
+          style={{
+            flex: 1,
+          }}>
+          <Video
+            source={{
+              uri: item.url,
+            }}
+            ref={videoRef}
+            onBuffer={onBuffer}
+            onError={videoError}
+            repeat={true}
+            paused={currentIndex !== index}
+            resizeMode="cover"
+            style={styles.backgroundVideo}
+          />
+          {/* upper right container */}
+          <View style={styles.uiContainer}>
+            <View style={styles.rightContainer}>
+              <Image
+                style={styles.profilePicture}
+                source={require('../../assets/images/user-image/first.jpg')}
+              />
+
+              {/* add the videos handler  */}
+              <TouchableOpacity
+                style={styles.iconContainer}
+                onPress={incrementLike}>
+                {like ? (
+                  <Icon2 name="heart" size={40} color="red" />
+                ) : (
+                  <Icon2 name="heart" size={40} color="#fff" />
+                )}
+
+                <Text style={styles.statsLabel}>{like}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.iconContainer}
+                onPress={openBottomSheetHandler}>
                 <Image
-                  style={styles.profilePicture}
-                  source={require('../../assets/images/user-image/first.jpg')}
-                />
+                  source={require('../../assets/images/user-image/comment.png')}></Image>
+                <Text style={styles.statsLabel}>Comment</Text>
+              </TouchableOpacity>
 
-                {/* add the videos handler  */}
+              <TouchableOpacity
+                style={styles.iconContainer}
+                onPress={async () => {
+                  await share();
+                }}>
+                <Icon2 name="share" size={40} color="#fff" />
+                <Text style={styles.statsLabel}>Share</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.iconContainer}
+                onPress={() => alert('comming Soon')}>
+                <Image
+                  source={require('../../assets/images/user-image/threedot.png')}></Image>
+              </TouchableOpacity>
+            </View>
+
+            {/* user name and discription  */}
+            <View style={styles.user_main_container}>
+              <View style={styles.userid_container}>
+                <Text style={styles.handle}>{item.id}</Text>
                 <TouchableOpacity
-                  style={styles.iconContainer}
-                  onPress={incrementLike}>
-                  {like ? (
-                    <Icon2 name="heart" size={40} color="red" />
-                  ) : (
-                    <Icon2 name="heart" size={40} color="#fff" />
-                  )}
-
-                  <Text style={styles.statsLabel}>{like}</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.iconContainer}
-                  onPress={openBottomSheetHandler}>
-                  <Image
-                    source={require('../../assets/images/user-image/comment.png')}></Image>
-                  <Text style={styles.statsLabel}>Comment</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.iconContainer}
-                  onPress={async () => {
-                    await share();
-                  }}>
-                  <Icon2 name="share" size={40} color="#fff" />
-                  <Text style={styles.statsLabel}>Share</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.iconContainer}
-                  onPress={() => alert('comming Soon')}>
-                  <Image
-                    source={require('../../assets/images/user-image/threedot.png')}></Image>
+                  style={styles.follow_btn}
+                  activeOpacity={0.7}
+                  onPress={followHandler}>
+                  <Text style={styles.follow_btn_text}>Follow</Text>
                 </TouchableOpacity>
               </View>
 
-              {/* user name and discription  */}
-              <View style={styles.user_main_container}>
-                <View style={styles.userid_container}>
-                  <Text style={styles.handle}>{item.id}</Text>
-                  <TouchableOpacity
-                    style={styles.follow_btn}
-                    activeOpacity={0.7}
-                    onPress={followHandler}>
-                    <Text style={styles.follow_btn_text}>Follow</Text>
-                  </TouchableOpacity>
+              <Text style={styles.description}>{item.discription}</Text>
+              <View style={styles.songs_container}>
+                <View style={styles.songs_image_container}>
+                  <Lottie
+                    style={styles.songImage}
+                    source={require('../../assets/animation/songs/songs2.json')}
+                    autoPlay
+                    loop
+                  />
+                  <Text style={styles.songName}>{item.songsName}</Text>
                 </View>
-
-                <Text style={styles.description}>{item.discription}</Text>
-                <View style={styles.songs_container}>
-                  <View style={styles.songs_image_container}>
-                    <Lottie
-                      style={styles.songImage}
-                      source={require('../../assets/animation/songs/songs2.json')}
-                      autoPlay
-                      loop
-                    />
-                    <Text style={styles.songName}>{item.songsName}</Text>
+              </View>
+            </View>
+            {/* bottom sheet  code  */}
+            <RBSheet
+              ref={refRBSheet}
+              closeOnDragDown={true}
+              closeOnPressBack={true}
+              animationType={'slide'}
+              customStyles={styles.bottomCustomStyles}>
+              {/* ui design in bottom sheet */}
+              <View style={styles.bottom_item}>
+                {/* custom header  */}
+                <View style={styles.header_container}>
+                  <View style={styles.header_main_container}>
+                    <TouchableOpacity
+                      onPress={() => refRBSheet?.current?.close()}>
+                      <Icon name="keyboard-backspace" size={40} color="#fff" />
+                    </TouchableOpacity>
+                    <Text style={styles.comment_text}>Comments</Text>
+                  </View>
+                  <View style={styles.share_main_container}>
+                    <TouchableOpacity
+                      style={styles.share_container}
+                      onPress={() => alert('comming soon')}>
+                      <Icon2 name="share-all" size={40} color="#fff" />
+                    </TouchableOpacity>
                   </View>
                 </View>
               </View>
-              {/* bottom sheet  code  */}
-              <RBSheet
-                ref={refRBSheet}
-                closeOnDragDown={true}
-                closeOnPressBack={true}
-                animationType={'slide'}
-                customStyles={styles.bottomCustomStyles}>
-                {/* ui design in bottom sheet */}
-                <View style={styles.bottom_item}>
-                  {/* custom header  */}
+              {/* comment  message container */}
+              <ScrollView showsVerticalScrollIndicator={true}>
+                {loading ? (
+                  <ActivityIndicator size={'large'} color={'#00ff00'} />
+                ) : (
+                  <View style={styles.comment_main_container}>
+                    <Text
+                      style={{
+                        fontSize: height / 45,
+                        color: '#fff',
+                        justifyContent: 'center',
+                      }}>
+                      Comming Soon
+                    </Text>
+                  </View>
+                )}
+              </ScrollView>
+
+              {/* bottom input container */}
+              <View style={{marginHorizontal: height * 0.01}}>
+                <View style={styles.comment_bottom_input_container}>
                   <View style={styles.header_container}>
                     <View style={styles.header_main_container}>
-                      <TouchableOpacity
-                        onPress={() => refRBSheet?.current?.close()}>
-                        <Icon
-                          name="keyboard-backspace"
-                          size={40}
-                          color="#fff"
-                        />
-                      </TouchableOpacity>
-                      <Text style={styles.comment_text}>Comments</Text>
+                      <Image
+                        source={require('../../assets/images/user-image/first.jpg')}
+                        resizeMode="cover"
+                        style={styles.comment_bottom_left_image}
+                      />
+                      <TextInput
+                        placeholder="Add a comment"
+                        value={comment}
+                        onChangeText={text => setComment(text)}
+                        placeholderTextColor={'#fff8'}
+                        style={styles.comment_bottom_input}
+                      />
                     </View>
                     <View style={styles.share_main_container}>
                       <TouchableOpacity
                         style={styles.share_container}
                         onPress={() => alert('comming soon')}>
-                        <Icon2 name="share-all" size={40} color="#fff" />
+                        <Icon2 name="send" size={30} color="#fff" />
                       </TouchableOpacity>
                     </View>
                   </View>
                 </View>
-                {/* comment  message container */}
-                <ScrollView showsVerticalScrollIndicator={true}>
-                  {loading ? (
-                    <ActivityIndicator size={'large'} color={'#00ff00'} />
-                  ) : (
-                    <View style={styles.comment_main_container}>
-                      <Text
-                        style={{
-                          fontSize: height / 45,
-                          color: '#fff',
-                          justifyContent: 'center',
-                        }}>
-                        Comming Soon
-                      </Text>
-                    </View>
-                  )}
-                </ScrollView>
-
-                {/* bottom input container */}
-                <View style={{marginHorizontal: height * 0.01}}>
-                  <View style={styles.comment_bottom_input_container}>
-                    <View style={styles.header_container}>
-                      <View style={styles.header_main_container}>
-                        <Image
-                          source={require('../../assets/images/user-image/first.jpg')}
-                          resizeMode="cover"
-                          style={styles.comment_bottom_left_image}
-                        />
-                        <TextInput
-                          placeholder="Add a comment"
-                          value={comment}
-                          onChangeText={text => setComment(text)}
-                          placeholderTextColor={'#fff8'}
-                          style={styles.comment_bottom_input}
-                        />
-                      </View>
-                      <View style={styles.share_main_container}>
-                        <TouchableOpacity
-                          style={styles.share_container}
-                          onPress={() => alert('comming soon')}>
-                          <Icon2 name="send" size={30} color="#fff" />
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  </View>
-                </View>
-              </RBSheet>
-            </View>
+              </View>
+            </RBSheet>
           </View>
-        </SafeAreaView>
+        </View>
       </>
     );
   };

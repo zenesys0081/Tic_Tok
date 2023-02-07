@@ -52,6 +52,7 @@ export default function Profile({navigation}) {
   const [btnLoader, setBtnLoading] = useState(false);
 
   const [isModalVisible, setModalVisible] = useState(false);
+
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
@@ -60,7 +61,7 @@ export default function Profile({navigation}) {
 
   // update profile details
   const updateProfileHandler = () => {
-    alert('comming soon');
+    setModalVisible(!isModalVisible);
   };
 
   // only update the picture
@@ -231,7 +232,7 @@ export default function Profile({navigation}) {
                     <TouchableOpacity
                       style={styles.modal_cancel}
                       onPress={toggleModal}>
-                      <Icon name="cancel" size={40} color={'red'} />
+                      <Icon name="cancel" size={45} color={'red'} />
                     </TouchableOpacity>
                     <View style={styles.image_container}>
                       {/* image container */}
@@ -458,8 +459,8 @@ const styles = StyleSheet.create({
   },
 
   modal_cancel: {
-    width: width * 0.1,
-    height: height * 0.05,
+    width: width * 0.15,
+    height: height * 0.06,
     position: 'absolute',
     marginVertical: height * 0.01,
     marginHorizontal: height * 0.01,
