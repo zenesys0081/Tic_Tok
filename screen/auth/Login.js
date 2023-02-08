@@ -11,10 +11,12 @@ import {
   View,
   ActivityIndicator,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
+import {openDatabase} from 'react-native-sqlite-storage';
 
+var db = openDatabase({name: 'UserDatabase.db'});
 const {width, height} = Dimensions.get('screen');
 
 export default function Login({navigation}) {

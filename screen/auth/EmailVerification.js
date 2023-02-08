@@ -9,24 +9,68 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 const {width, height} = Dimensions.get('screen');
+
+import {openDatabase} from 'react-native-sqlite-storage';
+var db = openDatabase({name: 'UserDatabase.db'});
 
 export default function EmailVerification({navigation}) {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    db.transaction(txn => {
+      txn.executeSql(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='table_email'",
+        [],
+        (tx, res) => {
+          console.log('item:', res.rows.length);
+          if (res.rows.length == 0) {
+            txn.executeSql('DROP TABLE IF EXISTS table_email', []);
+            txn.executeSql(
+              'CREATE TABLE IF NOT EXISTS table_email(email VARCHAR(20))',
+              [],
+            );
+          } else {
+            console.log('email created already');
+          }
+        },
+      );
+    });
+  }, []);
+
   const emailHandler = () => {
     if (!email) {
-      alert('Please enter the correct email');
-      return null;
+      alert('Please fill email');
+      return;
     }
-    if (email === 'praveshkumar@gmail.com') {
-      alert('Please check your email. Send the otp code in your given email');
-      navigation.replace('SignUp');
-    } else alert('Please enter the correct email to show the input hint-');
+
+    db.transaction(function (tx) {
+      tx.executeSql(
+        'INSERT INTO table_email (email) VALUES (?)',
+        [email],
+        (tx, results) => {
+          console.log('Results', results.rowsAffected);
+          if (results.rowsAffected > 0) {
+            Alert.alert(
+              'Success',
+              'You email Registered Successfully',
+              [
+                {
+                  text: 'Ok',
+                  onPress: () => navigation.navigate('SignUp'),
+                },
+              ],
+              {cancelable: false},
+            );
+          } else alert('Registration Failed');
+        },
+      );
+    });
   };
 
   return (
@@ -46,7 +90,7 @@ export default function EmailVerification({navigation}) {
             <View style={styles.input_main_container}>
               <TextInput
                 style={styles.input}
-                placeholder={'Email - praveshkumar@gmail.com'}
+                placeholder={'Enter the Email-Id'}
                 placeholderTextColor={'#0006'}
                 value={email}
                 onChangeText={text => setEmail(text)}

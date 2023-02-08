@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   Alert,
   Dimensions,
-  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -15,12 +14,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 
 const {width, height} = Dimensions.get('screen');
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
+import {openDatabase} from 'react-native-sqlite-storage';
+
+var db = openDatabase({name: 'UserDatabase.db'});
 
 export default function SignUp({navigation}) {
   const [firstName, setFirstName] = useState('');
@@ -29,9 +31,29 @@ export default function SignUp({navigation}) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const [available, setUnavailable] = useState(false);
   const [rightIcon, setRightIcon] = useState('eye-off');
   const [passwordVisibility, setPasswordVisibility] = useState(true);
+
+  useEffect(() => {
+    db.transaction(txn => {
+      txn.executeSql(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='table_user_register'",
+        [],
+        (tx, res) => {
+          console.log('item:', res.rows.length);
+          if (res.rows.length == 0) {
+            txn.executeSql('DROP TABLE IF EXISTS table_user_register', []);
+            txn.executeSql(
+              'CREATE TABLE IF NOT EXISTS table_user_register (firstName VARCHAR(20),lastName VARCHAR(20), phone INTEGER(20),password INTEGER(20))',
+              [],
+            );
+          } else {
+            console.log('email created already');
+          }
+        },
+      );
+    });
+  }, []);
 
   // call the api register the user
   const registerHandler = () => {
@@ -48,15 +70,29 @@ export default function SignUp({navigation}) {
       alert('Please enter the password');
       return;
     }
-    if (
-      firstName === 'pravesh' &&
-      lastName === 'kumar' &&
-      phone === '7078235703' &&
-      password === 'kumar@2002'
-    ) {
-      navigation.replace('Login');
-      alert('User is registered Successfully !!');
-    } else alert('Please enter the all correct details');
+
+    db.transaction(function (tx) {
+      tx.executeSql(
+        'INSERT INTO table_user_register (firstName, lastName, phone, password) VALUES (?,?,?,?)',
+        [firstName, lastName, phone, password],
+        (tx, results) => {
+          console.log('Results', results.rowsAffected);
+          if (results.rowsAffected > 0) {
+            Alert.alert(
+              'Success',
+              'User Registered Successfully',
+              [
+                {
+                  text: 'Ok',
+                  onPress: () => navigation.navigate('Login'),
+                },
+              ],
+              {cancelable: false},
+            );
+          } else alert('Registration Failed');
+        },
+      );
+    });
   };
 
   // password show and hide function
@@ -85,7 +121,7 @@ export default function SignUp({navigation}) {
             <View style={styles.input_main_container}>
               <TextInput
                 style={styles.input}
-                placeholder={'FirstName hint - pravesh'}
+                placeholder={'Enter the first Name'}
                 placeholderTextColor={'#0006'}
                 value={firstName}
                 onChangeText={text => setFirstName(text)}
@@ -93,7 +129,7 @@ export default function SignUp({navigation}) {
               />
               <TextInput
                 style={styles.input}
-                placeholder={'LastName hint - kumar'}
+                placeholder={'Enter the last Name'}
                 placeholderTextColor={'#0006'}
                 value={lastName}
                 onChangeText={text => setLastName(text)}
@@ -101,7 +137,7 @@ export default function SignUp({navigation}) {
               />
               <TextInput
                 style={styles.input}
-                placeholder={'Phone hint - 7078235703'}
+                placeholder={'Enter the Phone'}
                 placeholderTextColor={'#0006'}
                 value={phone}
                 maxLength={10}
@@ -114,7 +150,7 @@ export default function SignUp({navigation}) {
               <View style={styles.user_input_container}>
                 <TextInput
                   style={styles.user_input}
-                  placeholder={'password hint - kumar@2002'}
+                  placeholder={'Enter the password'}
                   placeholderTextColor={'#0006'}
                   value={password}
                   onChangeText={text => setPassword(text)}
