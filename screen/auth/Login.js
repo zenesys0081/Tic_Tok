@@ -15,6 +15,7 @@ import React, {useEffect, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
 import {openDatabase} from 'react-native-sqlite-storage';
+import {useIsFocused} from '@react-navigation/native';
 
 var db = openDatabase({name: 'UserDatabase.db'});
 const {width, height} = Dimensions.get('screen');
@@ -22,7 +23,9 @@ const {width, height} = Dimensions.get('screen');
 export default function Login({navigation}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
+  const [loading, setLoading] = useState(false);
+  const [allEmailData, setALlEmailData] = useState([]);
+  const isFocused = useIsFocused();
   const [rightIcon, setRightIcon] = useState('eye-off');
   const [passwordVisibility, setPasswordVisibility] = useState(true);
 
@@ -37,6 +40,17 @@ export default function Login({navigation}) {
     }
   };
 
+  useEffect(() => {
+    db.transaction(tx => {
+      tx.executeSql('SELECT * FROM  table_user_register', [], (tx, results) => {
+        var temp = [];
+        for (let i = 0; i < results.rows.length; ++i)
+          temp.push(results.rows.item(i));
+        setALlEmailData(temp);
+      });
+    });
+  }, [isFocused]);
+
   const loginHandler = () => {
     if (!email) {
       alert('Please enter the email');
@@ -46,10 +60,15 @@ export default function Login({navigation}) {
       alert('Please enter the password');
       return null;
     }
-
-    if (email === 'demo@gmail.com' && password === '12345') {
+    setLoading();
+    const data = allEmailData?.filter(item => {
+      return item.email === email && item.password === password;
+    });
+    if (data.length === 1) {
+      setLoading(false);
       navigation.navigate('Dashboard');
     } else {
+      setLoading(false);
       alert('Please enter the correct email and password');
     }
   };
@@ -69,7 +88,7 @@ export default function Login({navigation}) {
             <View style={styles.input_main_container}>
               <TextInput
                 style={styles.input}
-                placeholder={'Email- demo@gmail.com'}
+                placeholder={'Enter the correct email '}
                 placeholderTextColor={'#0006'}
                 value={email}
                 onChangeText={text => setEmail(text)}
@@ -79,7 +98,7 @@ export default function Login({navigation}) {
             <View style={styles.user_input_container}>
               <TextInput
                 style={styles.user_input}
-                placeholder={'Password hint- 12345'}
+                placeholder={'Enter the correct password'}
                 placeholderTextColor={'#0006'}
                 value={password}
                 onChangeText={text => setPassword(text)}
@@ -114,13 +133,17 @@ export default function Login({navigation}) {
                 end={{x: 0, y: 0}}
                 colors={['#3393E4', '#715886']}
                 style={styles.button}>
-                <Text style={styles.text}>Continue</Text>
+                {loading ? (
+                  <ActivityIndicator size="large" color="#f33" />
+                ) : (
+                  <Text style={styles.text}>Continue</Text>
+                )}
               </LinearGradient>
             </TouchableOpacity>
             {/* text */}
             <TouchableOpacity
               style={styles.otp_container}
-              onPress={() => navigation.navigate('EmailVerification')}>
+              onPress={() => navigation.navigate('SignUp')}>
               <Text style={styles.otp_text}>
                 Don't have an account ? Sign-Up
               </Text>

@@ -26,6 +26,7 @@ var db = openDatabase({name: 'UserDatabase.db'});
 
 export default function SignUp({navigation}) {
   const [firstName, setFirstName] = useState('');
+  const [email, setEmail] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -44,7 +45,7 @@ export default function SignUp({navigation}) {
           if (res.rows.length == 0) {
             txn.executeSql('DROP TABLE IF EXISTS table_user_register', []);
             txn.executeSql(
-              'CREATE TABLE IF NOT EXISTS table_user_register (firstName VARCHAR(20),lastName VARCHAR(20), phone INTEGER(20),password INTEGER(20))',
+              'CREATE TABLE IF NOT EXISTS table_user_register (email VARCHAR(20),firstName VARCHAR(20),lastName VARCHAR(20), phone INTEGER(20),password INTEGER(20))',
               [],
             );
           } else {
@@ -57,7 +58,10 @@ export default function SignUp({navigation}) {
 
   // call the api register the user
   const registerHandler = () => {
-    if (!firstName) {
+    if (!email) {
+      alert('Please enter the email');
+      return;
+    } else if (!firstName) {
       alert('Please enter the firstName');
       return;
     } else if (!lastName) {
@@ -70,14 +74,15 @@ export default function SignUp({navigation}) {
       alert('Please enter the password');
       return;
     }
-
+    setLoading(true);
     db.transaction(function (tx) {
       tx.executeSql(
-        'INSERT INTO table_user_register (firstName, lastName, phone, password) VALUES (?,?,?,?)',
-        [firstName, lastName, phone, password],
+        'INSERT INTO table_user_register (email, firstName, lastName, phone, password) VALUES (?,?,?,?,?)',
+        [email, firstName, lastName, phone, password],
         (tx, results) => {
           console.log('Results', results.rowsAffected);
           if (results.rowsAffected > 0) {
+            setLoading(false);
             Alert.alert(
               'Success',
               'User Registered Successfully',
@@ -89,7 +94,10 @@ export default function SignUp({navigation}) {
               ],
               {cancelable: false},
             );
-          } else alert('Registration Failed');
+          } else {
+            alert('Registration Failed');
+            setLoading(false);
+          }
         },
       );
     });
@@ -119,6 +127,14 @@ export default function SignUp({navigation}) {
             <Text style={styles.heading_title}>Create Account</Text>
             {/* email container */}
             <View style={styles.input_main_container}>
+              <TextInput
+                style={styles.input}
+                placeholder={'Enter the Email-Id'}
+                placeholderTextColor={'#0006'}
+                value={email}
+                onChangeText={text => setEmail(text)}
+                autoCapitalize="none"
+              />
               <TextInput
                 style={styles.input}
                 placeholder={'Enter the first Name'}
